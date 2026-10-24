@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#15314d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="קצין תורן"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><title>צ׳ק-ליסט קצין תורן</title><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style><style>
+/* Layout: sticky tab bar over one column of large tap rows (56px+) for tablet and phone; shift-level items count toward progress, per-event checklists reset separately; open incidents and complaints live in one tracking tab. */
+:root {
+  --bg: #e8ecf0;
+  --surface: #ffffff;
+  --surface-2: #f2f5f8;
+  --ink: #12212e;
+  --ink-2: #4b5d6c;
+  --line: #cdd6de;
+  --hdr: #15314d;
+  --hdr-ink: #f2f6fa;
+  --hdr-ink-2: #aebfce;
+  --hdr-field: rgba(255, 255, 255, 0.1);
+  --hdr-line: rgba(255, 255, 255, 0.28);
+  --accent: #1a5fb0;
+  --on-accent: #ffffff;
+  --ok: #1b7f4c;
+  --on-ok: #ffffff;
+  --p1: #b3261e;
+  --p1-bg: #fdeceb;
+  --p2: #a14a00;
+  --p2-bg: #fff0da;
+  --p3: #0c6a70;
+  --p3-bg: #dff2f2;
+  --warn-bg: #fff4d6;
+  --warn-ink: #5c4300;
+  --font-display: 'Secular One', 'Arial Hebrew', Arial, sans-serif;
+  --font-body: 'Assistant', 'Arial Hebrew', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --on-s: #ffffff;
+  --c1: #1a5fb0; --c2: #c2362b; --c3: #7a3fb5; --c4: #0b7a80; --c5: #b85c00; --c6: #b0287a; --c7: #3d4fa8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1219;
+    --surface: #131e28;
+    --surface-2: #192735;
+    --ink: #e7eef5;
+    --ink-2: #9fb2c2;
+    --line: #2a3c4c;
+    --hdr: #0f2236;
+    --hdr-ink: #e7eef5;
+    --hdr-ink-2: #8fa6ba;
+    --hdr-field: rgba(255, 255, 255, 0.08);
+    --hdr-line: rgba(255, 255, 255, 0.22);
+    --accent: #7bb4ff;
+    --on-accent: #08182a;
+    --ok: #58cf8c;
+    --on-ok: #06170e;
+    --p1: #ff9a90;
+    --p1-bg: #3b1b19;
+    --p2: #ffbd73;
+    --p2-bg: #3a2813;
+    --p3: #62d2d6;
+    --p3-bg: #123231;
+    --warn-bg: #3a3010;
+    --warn-ink: #f1d98a;
+    --on-s: #0b1219;
+    --c1: #7bb4ff; --c2: #ff9a90; --c3: #c9a0ff; --c4: #62d2d6; --c5: #ffb366; --c6: #ff9ad0; --c7: #9fb0ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1219;
+  --surface: #131e28;
+  --surface-2: #192735;
+  --ink: #e7eef5;
+  --ink-2: #9fb2c2;
+  --line: #2a3c4c;
+  --hdr: #0f2236;
+  --hdr-ink: #e7eef5;
+  --hdr-ink-2: #8fa6ba;
+  --hdr-field: rgba(255, 255, 255, 0.08);
+  --hdr-line: rgba(255, 255, 255, 0.22);
+  --accent: #7bb4ff;
+  --on-accent: #08182a;
+  --ok: #58cf8c;
+  --on-ok: #06170e;
+  --p1: #ff9a90;
+  --p1-bg: #3b1b19;
+  --p2: #ffbd73;
+  --p2-bg: #3a2813;
+  --p3: #62d2d6;
+  --p3-bg: #123231;
+  --warn-bg: #3a3010;
+  --warn-ink: #f1d98a;
+  --on-s: #0b1219;
+  --c1: #7bb4ff; --c2: #ff9a90; --c3: #c9a0ff; --c4: #62d2d6; --c5: #ffb366; --c6: #ff9ad0; --c7: #9fb0ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, p, ul, ol { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.wrap {
+  max-width: 900px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Header */
+.hdr { background: var(--hdr); color: var(--hdr-ink); padding-block: 18px 16px; }
+.hdr-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.eyebrow { font-size: 13px; letter-spacing: 0.06em; color: var(--hdr-ink-2); font-weight: 600; }
+.hdr h1 { font-family: var(--font-display); font-weight: 400; font-size: 30px; line-height: 1.15; text-wrap: balance; }
+.clockbox { text-align: start; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.clock { font-family: var(--font-mono); font-weight: 600; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.clockbox small { font-size: 13px; color: var(--hdr-ink-2); }
+.hdr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.hbtn {
+  min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--hdr-line);
+  background: var(--hdr-field); color: var(--hdr-ink); font-weight: 600; font-size: 15px;
+}
+.hbtn.armed { background: var(--p1); color: #fff; border-color: var(--p1); }
+.hbtn:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+.fields label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--hdr-ink-2); font-weight: 600; min-width: 0; }
+.f {
+  font: inherit; font-size: 16px; min-height: 46px; padding: 0 12px; width: 100%;
+  background: var(--hdr-field); color: var(--hdr-ink); border: 1px solid var(--hdr-line); border-radius: 10px;
+}
+.f option { color: #12212e; }
+.f::placeholder { color: var(--hdr-ink-2); }
+.prog { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+.bar { flex: 1; height: 10px; background: var(--hdr-field); border-radius: 99px; overflow: hidden; border: 1px solid var(--hdr-line); }
+.bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width 0.25s ease; }
+#progtxt { font-size: 14px; font-weight: 600; white-space: nowrap; }
+
+/* Jump nav: one colored chip per section */
+.besiyata { font-weight: 700; font-size: 18px; margin-bottom: 6px; text-align: start; }
+.hello { color: var(--hdr-ink-2); font-size: 15px; margin-top: 4px; max-width: 60ch; }
+.rainbow { height: 6px; background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6), var(--c7)); }
+.tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.tabs-scroll { display: flex; gap: 8px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+.tabs-scroll::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto; min-height: 46px; padding: 0 14px; background: var(--surface); border: 2px solid var(--s);
+  border-radius: 99px; font-weight: 700; color: var(--s);
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.tab.on { background: var(--s); color: var(--on-s); }
+.tab.on .bdg { background: transparent; color: inherit; border-color: currentColor; }
+.bdg {
+  font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 99px;
+  background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line);
+}
+.bdg.hot { background: var(--p1); color: #fff; border-color: var(--p1); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bdg.hot { color: #1d0b0a; } }
+:root[data-theme="dark"] .bdg.hot { color: #1d0b0a; }
+
+/* Page: every step is one tinted section with a solid colored banner */
+.main { padding-block: 18px 28px; display: flex; flex-direction: column; gap: 28px; }
+.main:focus { outline: none; }
+.sec {
+  --accent: var(--s); --on-accent: var(--on-s);
+  display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 76px; padding-bottom: 18px; overflow: hidden;
+  background: color-mix(in srgb, var(--s) 8%, var(--bg));
+  border: 2px solid color-mix(in srgb, var(--s) 40%, var(--bg)); border-radius: 18px;
+}
+.sec > * { margin-inline: 14px; }
+.sec > h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.2; text-wrap: balance; }
+.sec > h2:first-child { margin-inline: 0; padding: 14px 16px; background: var(--s); color: var(--on-s); }
+.sec > h2:not(:first-child) { color: var(--s); margin-top: 8px; }
+.lede { color: var(--ink-2); max-width: 65ch; }
+.notice {
+  background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--p2);
+  border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+}
+
+.group { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.gh { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; background: color-mix(in srgb, var(--s) 14%, var(--surface)); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.gh h3 { font-size: 19px; font-weight: 700; }
+.hint { color: var(--ink-2); font-size: 15px; }
+.gh-r { display: flex; align-items: center; gap: 10px; }
+.gcount { font-weight: 600; font-size: 15px; color: var(--ink-2); }
+.scope { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink-2); }
+
+.item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; padding: 6px 12px 6px 14px; border-top: 1px solid var(--line); }
+.item:first-child { border-top: 0; }
+.row { display: flex; align-items: center; gap: 14px; min-height: 58px; padding: 8px 0; cursor: pointer; position: relative; min-width: 0; }
+.cb { position: absolute; opacity: 0; width: 30px; height: 30px; margin: 0; }
+.box {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; border: 2px solid var(--ink-2);
+  background: var(--surface); display: inline-flex; align-items: center; justify-content: center; color: var(--on-ok);
+}
+.box svg { opacity: 0; }
+.cb:checked + .box { background: var(--ok); border-color: var(--ok); }
+.cb:checked + .box svg { opacity: 1; }
+.cb:focus-visible + .box { outline: 3px solid var(--accent); outline-offset: 2px; }
+.txt { min-width: 0; overflow-wrap: anywhere; }
+.item.done .txt { color: var(--ink-2); }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 8px; border-radius: 99px; background: var(--p2-bg); color: var(--p2); border: 1px solid var(--p2); vertical-align: middle; margin-inline-start: 6px; }
+.side { display: flex; align-items: center; gap: 8px; }
+.stamp { font-size: 14px; color: var(--ok); font-weight: 600; min-width: 3.2em; text-align: end; }
+.note-btn { min-height: 40px; padding: 0 10px; border-radius: 8px; background: none; border: 1px solid var(--line); color: var(--ink-2); font-size: 14px; }
+.note-btn.has { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.item .note { grid-column: 1 / -1; margin-bottom: 8px; }
+.ordered .items { counter-reset: n; }
+.ordered .item { counter-increment: n; }
+.ordered .txt::before { content: counter(n) '. '; font-family: var(--font-mono); font-weight: 700; color: var(--s); }
+
+/* Controls */
+.inp {
+  font: inherit; font-size: 16px; min-height: 48px; padding: 8px 12px; width: 100%;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink);
+}
+textarea.inp { min-height: 76px; resize: vertical; }
+.btn {
+  min-height: 50px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--on-accent); font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+}
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn.sm { min-height: 42px; padding: 0 12px; font-size: 15px; }
+.btn.danger { background: transparent; color: var(--p1); border-color: var(--p1); }
+.btn.armed { background: var(--p1); color: #fff; border-color: var(--p1); }
+.link { background: none; border: 0; color: var(--accent); text-decoration: underline; min-height: 40px; padding: 0 6px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.fl { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; color: var(--ink-2); min-width: 0; }
+.widget { padding: 14px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
+.widget.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.err { color: var(--p1); font-weight: 600; }
+
+/* Priority cards and routing */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card h3 { font-size: 18px; font-weight: 700; }
+.card ul { display: flex; flex-direction: column; gap: 4px; padding-inline-start: 18px; list-style: disc; }
+.card .act { font-size: 15px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 10px; }
+.pill { align-self: flex-start; font-weight: 700; font-size: 14px; padding: 2px 12px; border-radius: 99px; }
+.pill.p1 { background: var(--p1-bg); color: var(--p1); border: 1px solid var(--p1); }
+.pill.p2 { background: var(--p2-bg); color: var(--p2); border: 1px solid var(--p2); }
+.pill.p3 { background: var(--p3-bg); color: var(--p3); border: 1px solid var(--p3); }
+.plain { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.plain h3 { font-size: 18px; }
+.plain ul { padding-inline-start: 18px; list-style: disc; display: flex; flex-direction: column; gap: 4px; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; }
+.flow span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 4px 14px; font-weight: 600; }
+.small { font-size: 14px; color: var(--ink-2); }
+
+/* Tracking */
+.stats { display: flex; flex-wrap: wrap; gap: 8px 18px; font-weight: 600; }
+.stats b { font-family: var(--font-mono); font-size: 20px; }
+.stats .hot b { color: var(--p1); }
+.addbox { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.addbox > summary { list-style: none; min-height: 54px; display: flex; align-items: center; padding: 0 16px; font-weight: 700; color: var(--accent); cursor: pointer; }
+.addbox > summary::-webkit-details-marker { display: none; }
+.addbox[open] > summary { border-bottom: 1px solid var(--line); }
+.addbody { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.seg { border: 0; padding: 0; margin: 0; display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.seg legend { font-size: 14px; font-weight: 600; color: var(--ink-2); padding: 0 0 4px; }
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; inset: 0; }
+.seg span { display: inline-flex; align-items: center; min-height: 48px; padding: 0 16px; border-radius: 10px; border: 2px solid var(--line); font-weight: 700; background: var(--surface); }
+.seg input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.seg .s1 { color: var(--p1); } .seg .s2 { color: var(--p2); } .seg .s3 { color: var(--p3); }
+.seg input:checked + .s1 { background: var(--p1-bg); border-color: var(--p1); }
+.seg input:checked + .s2 { background: var(--p2-bg); border-color: var(--p2); }
+.seg input:checked + .s3 { background: var(--p3-bg); border-color: var(--p3); }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.inc { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.inc.stale { border-color: var(--p2); border-width: 2px; }
+.inc.closed { opacity: 0.65; }
+.inc-h { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.inc-h .num { font-weight: 600; }
+.since { color: var(--ink-2); font-size: 14px; }
+.stale-flag { background: var(--p2-bg); color: var(--p2); border: 1px solid var(--p2); border-radius: 99px; padding: 0 10px; font-size: 13px; font-weight: 700; }
+.inc h3 { font-size: 18px; font-weight: 700; overflow-wrap: anywhere; }
+.loc { color: var(--ink-2); overflow-wrap: anywhere; }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 18px; color: var(--ink-2); }
+.cam { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; }
+.cam.bad2 { background: var(--p2-bg); border-color: var(--p2); }
+.cam.bad1 { background: var(--p1-bg); border-color: var(--p1); }
+.cam .cno { font-weight: 600; min-width: 3.5em; }
+.cam .inp { flex: 1 1 140px; min-height: 44px; }
+.cam select.inp { flex: 0 1 130px; }
+.camsum { font-weight: 700; }
+.camsum.warn { color: var(--p1); }
+.round { display: flex; flex-direction: column; gap: 10px; }
+.round-info { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.round.late .round-since { color: var(--p2); font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip-t { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font-size: 14px; }
+.fallback { background: var(--surface); border: 1px solid var(--accent); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.foot { padding-block: 4px 40px; color: var(--ink-2); font-size: 14px; }
+.toast {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; text-align: center; font-weight: 700;
+  background: var(--ink); color: var(--bg);
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+@media (max-width: 480px) {
+  .hdr h1 { font-size: 26px; }
+  .sec > h2 { font-size: 23px; }
+}
+</style></head><body><div id="app" dir="rtl" lang="he">
+  <header class="hdr">
+    <div class="wrap">
+      <p class="besiyata">בס"ד</p>
+      <div class="hdr-top">
+        <div>
+          <p class="eyebrow">מחוז ש״י · משמרת תחנתית</p>
+          <h1>צ׳ק-ליסט קצין תורן</h1>
+          <p class="hello">עוברים על הדף מלמעלה למטה, או קופצים ישר לשלב מהתפריט הצבעוני. כל סימון נשמר אוטומטית.</p>
+          <div class="hdr-actions">
+            <button class="hbtn" id="startbtn" data-act="start">התחל משמרת</button>
+            <button class="hbtn" data-act="new-shift">משמרת חדשה</button>
+            <button class="hbtn" id="backupbtn" data-act="backup">הורד גיבוי משמרת</button>
+          </div>
+          <p class="hello" id="backupnote"></p>
+        </div>
+        <div class="clockbox">
+          <span class="clock" id="clock">--:--</span>
+          <small id="datetxt"></small>
+          <small id="elapsed"></small>
+        </div>
+      </div>
+      <div class="fields">
+        <label>תחנה<input class="f" data-bind="meta.station" placeholder="שם התחנה" autocomplete="off"></label>
+        <label>משמרת
+          <select class="f" data-bind="meta.shift">
+            <option value="">בחר</option><option value="בוקר">בוקר</option><option value="ערב">ערב</option><option value="לילה">לילה</option>
+          </select>
+        </label>
+        <label>קצין תורן<input class="f" data-bind="meta.officer" placeholder="שם" autocomplete="off"></label>
+        <label>יומנאי<input class="f" data-bind="meta.yoman" placeholder="שם" autocomplete="off"></label>
+      </div>
+      <div class="prog">
+        <div class="bar" id="bar" role="progressbar" aria-label="התקדמות סעיפי המשמרת" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="barfill"></i></div>
+        <span id="progtxt"></span>
+      </div>
+    </div>
+  </header>
+  <div class="rainbow" aria-hidden="true"></div>
+  <div class="tabs" id="tabs" role="navigation" aria-label="קפיצה לשלב במשמרת"><div class="wrap"><div class="tabs-scroll" id="tabs-scroll"></div></div></div>
+  <main class="wrap main" id="panel" tabindex="-1"></main>
+  <footer class="wrap foot">תבנית עבודה לעזר בלבד. הנתונים נשמרים בדפדפן של המכשיר הזה ולא נשלחים לשום מקום. אל תזין מספרי זהות או פרטים רגישים מעבר לנדרש. בכל סתירה, נהלי המשטרה והנחיות המחוז גוברים.</footer>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  try { document.documentElement.setAttribute('dir', 'rtl'); document.documentElement.setAttribute('lang', 'he'); } catch (e) {}
+
+  var KEY = 'duty-officer-checklist-v1';
+  var STALE_INC = { 1: 15, 2: 30, 3: 60 };
+  var STALE_CMP = 60;
+  var STATUS_INC = ['פתוח', 'כוח בדרך', 'בטיפול', 'הועבר', 'סגור'];
+  var TO_LIST = ['—', 'מוקד מחוזי', 'קצין אח״ם', 'קצין מבצעים מחוזי', 'מפקד תחנה', 'גורם אחר'];
+  var CMP_TYPES = ['פלילית', 'שירות ויחס', 'נגד שוטר', 'אחר'];
+  var STATUS_CMP = ['התקבלה', 'בטיפול', 'הועברה', 'נסגרה'];
+  var CAM_STATUS = ['תקינה', 'תקלה', 'חסרה'];
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  var uid = function () { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
+  var hhmm = function (ts) { var d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+  var minsSince = function (ts) { return Math.max(0, Math.floor((Date.now() - ts) / 60000)); };
+  function fmtDur(m) {
+    if (m < 1) return 'פחות מדקה';
+    if (m < 60) return m + ' דק׳';
+    return Math.floor(m / 60) + ':' + pad(m % 60) + ' שע׳';
+  }
+  function todayStr() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function dateLabel() {
+    try { return new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' }); }
+    catch (e) { return todayStr(); }
+  }
+
+  /* ---------- Content ---------- */
+  var TABS = [
+    { id: 'start', label: 'תחילת משמרת', badge: 'shift' },
+    { id: 'triage', label: 'תעדוף אירועים', badge: null },
+    { id: 'handoff', label: 'העברת אירועים', badge: null },
+    { id: 'complaints', label: 'תלונות אזרחים', badge: 'shift' },
+    { id: 'desk', label: 'עבודה מול היומנאי', badge: 'shift' },
+    { id: 'open', label: 'מעקב פתוחים', badge: 'open' },
+    { id: 'close', label: 'סיום משמרת', badge: 'shift' }
+  ];
+  var GROUPS = [];
+  function G(tab, g) { g.tab = tab; GROUPS.push(g); return g; }
+
+  G('start', { id: 'g-handover', title: '1. קבלת משמרת', scope: 'shift', items: [
+    { id: 'h1', t: 'קבלת סיכום מהקצין התורן היוצא: אירועים פתוחים, חריגים ופעילות מתמשכת', crit: true },
+    { id: 'h2', t: 'עיון ביומן התחנה ובהנחיות המחוז למשמרת: מבצעים, אירועים מתוכננים, התרעות' },
+    { id: 'h3', t: 'מצבת כוח אדם: שוטרים בתחנה, סיירות וניידות בשטח, חסרים ונעדרים' },
+    { id: 'h4', t: 'עצורים ומעוכבים בתחנה: מצב וזמני החזקה לפי נוהל' },
+    { id: 'h5', t: 'כלי רכב וציוד: ניידות תקינות, ציוד מגן, אמצעי לחימה וחתימות לפי נוהל' },
+    { id: 'h6', t: 'קשר ומערכות: מכשירי קשר, טלפון, מחשבים ומערכת הרישום עובדים' },
+    { id: 'h7', t: 'קשר עם גורמי הביטחון בשטח (צה״ל, מג״ב, קב״טי יישובים) לפי הנחיות המחוז' }
+  ] });
+  G('start', { id: 'g-brief', title: '2. תדרוך שוטרים', scope: 'shift', widget: 'brief', items: [
+    { id: 'b1', t: 'כינוס השוטרים בזמן וספירת נוכחים מול המצבה' },
+    { id: 'b2', t: 'סקירת מצב: אירועים פתוחים, חריגים אחרונים, התרעות ומבצעים מתוכננים' },
+    { id: 'b3', t: 'מידע מבצעי שמותר לשתף: רכבים מבוקשים, חשודים, אזורי עניין' },
+    { id: 'b4', t: 'חלוקת גזרות, כלי רכב ומשימות, ומינוי אחראי לכל כוח' },
+    { id: 'b5', t: 'בטיחות ושימוש בכוח: תזכורת לנהלים ולכללי פתיחה באש', crit: true },
+    { id: 'b6', t: 'הנחיות לדיווח בקשר ולשימוש במצלמת גוף' },
+    { id: 'b7', t: 'טריגרים: מתי קוראים לקצין התורן ומתי למוקד' },
+    { id: 'b8', t: 'שאלות ווידוא שכל שוטר מבין את גזרתו ואת משימתו' }
+  ] });
+  G('start', { id: 'g-bwc', title: '3. בדק מצלמות גוף', scope: 'shift', widget: 'cams', items: [
+    { id: 'w1', t: 'ספירת מצלמות בעמדת הטעינה מול הרשימה. חסרה מצלמה: מדווחים מיד', crit: true },
+    { id: 'w2', t: 'שיוך מצלמה לכל שוטר ורישום בטבלה שלמטה' },
+    { id: 'w3', t: 'טעינה: סוללה מספיקה למשמרת וחיווי תקין' },
+    { id: 'w4', t: 'הקלטת ניסיון קצרה והפעלה חוזרת: ההקלטה פועלת והחיווי מופיע' },
+    { id: 'w5', t: 'שעון ותאריך נכונים, ויש מקום פנוי בזיכרון' },
+    { id: 'w6', t: 'עדשה נקייה, קליפס יציב, מיקום נכון על הגוף' },
+    { id: 'w7', t: 'מצלמה פגומה: החלפה, רישום ביומן ודיווח לגורם האחראי' },
+    { id: 'w8', t: 'תזכורת לשוטרים: להפעיל מצלמה לפי הנוהל ולדווח על כל תקלה במהלך המשמרת' }
+  ] });
+
+  G('triage', { id: 'g-triage', title: 'סדר פעולות באירוע חריג', scope: 'event', ordered: true,
+    hint: 'סמן תוך כדי טיפול. בסיום האירוע לחץ אפס.', items: [
+    { id: 't1', t: 'קליטת מידע ראשוני: מה קרה, איפה (כתובת מדויקת), מתי, נפגעים, סכנה מתמשכת, נשק ומעורבים' },
+    { id: 't2', t: 'קביעת עדיפות 1, 2 או 3. בספק: עדיפות גבוהה יותר' },
+    { id: 't3', t: 'שיגור הכוח הקרוב והמתאים, גיבוי ומינוי מי מנהל בזירה' },
+    { id: 't4', t: 'הזעקת מד״א וכבאות לפי הצורך, ותיאום עם צה״ל או מג״ב כשרלוונטי' },
+    { id: 't5', t: 'דיווח למוקד המחוזי ולשרשרת הפיקוד לפי טריגרי הדיווח' },
+    { id: 't6', t: 'שמירת זירה וראיות, והנחיית הכוח להפעיל מצלמות גוף' },
+    { id: 't7', t: 'רישום ביומן עם מספר אירוע ושעה (דרך היומנאי)' },
+    { id: 't8', t: 'מעקב: עדכון מהזירה והחלטה על הסלמה, העברה או סגירה' }
+  ] });
+
+  G('handoff', { id: 'g-handoff', title: 'פרוטוקול העברת אירוע', scope: 'event', ordered: true,
+    hint: 'לא מנתקים לפני שהמקבל אישר.', items: [
+    { id: 'o1', t: 'וידוא הגורם המקבל: שם, תפקיד וערוץ קשר' },
+    { id: 'o2', t: 'מסירה מובנית: מה קרה, איפה, מתי, נפגעים ומעורבים, עדיפות' },
+    { id: 'o3', t: 'מה בוצע עד כה: כוחות בזירה, גורמי הצלה, שימור זירה' },
+    { id: 'o4', t: 'מה מבוקש מהמקבל: תגבור, חקירה, אישור או המשך טיפול' },
+    { id: 'o5', t: 'המקבל חוזר על עיקרי הדברים ומאשר קבלה, ורושמים את השעה', crit: true },
+    { id: 'o6', t: 'עדכון ביומן: מועבר אל, שעה, שם המקבל' },
+    { id: 'o7', t: 'הכוח בזירה יודע מי הגורם האחראי מעתה' },
+    { id: 'o8', t: 'ליווי עד שהמקבל לוקח אחריות מלאה, ואז עדכון הסטטוס במעקב' }
+  ] });
+
+  G('complaints', { id: 'g-cmp-shift', title: 'ניהול שוטף של תלונות', scope: 'shift', widget: 'round-desk', items: [
+    { id: 'c1', t: 'סקירת הדלפק: מי ממתין ולכמה זמן, ושיוך שוטר לכל פונה' },
+    { id: 'c2', t: 'מעקב אחר תלונות שהתקבלו בטלפון או במערכות מקוונות' },
+    { id: 'c3', t: 'אין תלונה שממתינה זמן חריג בלי עדכון למתלונן' },
+    { id: 'c4', t: 'תלונות רגישות (אלימות במשפחה, עבירות מין, קטינים) הועברו לגורם המתאים' },
+    { id: 'c5', t: 'תלונות נגד שוטרים הופנו לפי נוהל ונרשמו' },
+    { id: 'c6', t: 'תלונות מורכבות או פתוחות נרשמו להעברה בסיום המשמרת' }
+  ] });
+  G('complaints', { id: 'g-cmp-event', title: 'קליטת תלונה: לכל פונה', scope: 'event', ordered: true,
+    hint: 'אפס בין פונה לפונה.', items: [
+    { id: 'e1', t: 'קבלת הפונה בסבלנות ובירור אם יש סכנה מיידית. אם כן: עוברים לתעדוף' },
+    { id: 'e2', t: 'זיהוי הפונה ואימות פרטים לפי נוהל, והזמנת מתורגמן אם נדרש' },
+    { id: 'e3', t: 'סיווג: תלונה פלילית, שירות ויחס, תלונה נגד שוטר, או עניין שאינו משטרתי' },
+    { id: 'e4', t: 'תלונה נגד שוטר: קבלה בלי לנסות להניא, והעברה לפי נוהל (מח״ש או גורם מוסמך)' },
+    { id: 'e5', t: 'תלונה רגישה: מקום פרטי, העברה לחוקר או ליחידה מתאימה, מסירת זכויות נפגע עבירה' },
+    { id: 'e6', t: 'רישום התלונה ומסירת מספר תלונה או אישור הגשה' },
+    { id: 'e7', t: 'הסבר על המשך הטיפול: מי יחזור אליו ובערך מתי' },
+    { id: 'e8', t: 'הוספה לטבלת התלונות הפתוחות אם הטיפול לא הסתיים' }
+  ] });
+
+  G('desk', { id: 'g-yo-a', title: 'תיאום בתחילת משמרת', scope: 'shift', items: [
+    { id: 'y1', t: 'היכרות עם היומנאי: שם ומערכות שהוא מפעיל. רשום את שמו בראש הדף' },
+    { id: 'y2', t: 'ערוצי דיווח: אירוע בעדיפות 1 ואירוע חריג מגיעים אליך מיד, בקשר או בטלפון', crit: true },
+    { id: 'y3', t: 'היומן פתוח, בתאריך ושעה נכונים, וההנחיות המחוזיות של המשמרת רשומות בו' },
+    { id: 'y4', t: 'מסירת חלוקת הגזרות, מצבת הכוחות וטריגרי הדיווח ליומנאי' },
+    { id: 'y5', t: 'אירוע חדש נרשם מיד עם שעה, מיקום מלא ומספר אירוע, גם לפני שהפרטים מלאים' }
+  ] });
+  G('desk', { id: 'g-yo-b', title: 'עבודה שוטפת', scope: 'shift', widget: 'round-log', items: [
+    { id: 'y6', t: 'סבב יומן: כל אירוע פתוח מעודכן, עם מיקום מלא, שעה ומספר אירוע' },
+    { id: 'y7', t: 'כל הוראה בעל פה לשוטרים נרשמת ביומן עם שעה ושם נותן ההוראה' },
+    { id: 'y8', t: 'אירוע פתוח שלא עודכן זמן ארוך: בירור סטטוס מול הכוח בשטח' },
+    { id: 'y9', t: 'מידע רגיש לא עובר בערוץ פתוח. מסירת מידע לגורמי חוץ רק דרכך או לפי נוהל' },
+    { id: 'y10', t: 'תיקון טעות ביומן נעשה בתוספת תיקון ולא במחיקה' },
+    { id: 'y11', t: 'הפסקות והחלפות: היומנאי לא נשאר בלי כיסוי בזמן אירוע פעיל' }
+  ] });
+
+  G('close', { id: 'g-close', title: 'סגירת משמרת', scope: 'shift', items: [
+    { id: 'z1', t: 'כל האירועים הפתוחים בטבלה מעודכנים ומועברים לקצין הנכנס עם סיכום', crit: true },
+    { id: 'z2', t: 'עצורים ומעוכבים: מצב מעודכן ומועבר' },
+    { id: 'z3', t: 'מצלמות גוף הוחזרו לעגינה, הקבצים הועלו או מסומנים להעלאה, ותקלות נרשמו' },
+    { id: 'z4', t: 'ציוד ונשק נאספו וחתימות הושלמו לפי נוהל' },
+    { id: 'z5', t: 'תלונות פתוחות וטיפול שנותר הועברו' },
+    { id: 'z6', t: 'היומן מעודכן עד שעת הסיום, והיומנאי הנכנס קיבל סיכום' },
+    { id: 'z7', t: 'עדכון סיום משמרת למוקד המחוזי או למפקד לפי נוהל' }
+  ] });
+
+  var BY = {};
+  GROUPS.forEach(function (g) { BY[g.id] = g; });
+
+  /* ---------- State ---------- */
+  function defaults() {
+    return {
+      v: 1, date: todayStr(), lastActive: 0, tab: 'start',
+      meta: { station: '', shift: '', officer: '', yoman: '', startedAt: null },
+      checks: {}, notes: {}, incidents: [], complaints: [], cams: [],
+      rounds: { log: [], desk: [] }, brief: { time: '', count: '' }
+    };
+  }
+  function load() {
+    var d = defaults();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        var s = Object.assign(d, o);
+        s.meta = Object.assign(defaults().meta, o.meta || {});
+        s.rounds = Object.assign({ log: [], desk: [] }, o.rounds || {});
+        s.brief = Object.assign({ time: '', count: '' }, o.brief || {});
+        return s;
+      }
+    } catch (e) {}
+    return d;
+  }
+  var S = load();
+  var oldData = false;
+  (function () {
+    var has = Object.keys(S.checks).length || S.incidents.length || S.complaints.length;
+    oldData = !!(has && S.lastActive && Date.now() - S.lastActive > 16 * 3600 * 1000);
+  })();
+  function save() {
+    S.lastActive = Date.now();
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  }
+  function setPath(path, val) {
+    var p = path.split('.'); var o = S;
+    for (var i = 0; i < p.length - 1; i++) o = o[p[i]];
+    o[p[p.length - 1]] = val;
+  }
+  function getPath(path) {
+    var p = path.split('.'); var o = S;
+    for (var i = 0; i < p.length; i++) { if (o == null) return ''; o = o[p[i]]; }
+    return o;
+  }
+
+  /* ---------- Counting ---------- */
+  function tabCounts(tab) {
+    var d = 0, t = 0;
+    GROUPS.forEach(function (g) {
+      if (g.tab !== tab || g.scope !== 'shift') return;
+      g.items.forEach(function (i) { t++; if (S.checks[i.id]) d++; });
+    });
+    return { d: d, t: t };
+  }
+  function totalCounts() {
+    var d = 0, t = 0;
+    TABS.forEach(function (x) { var c = tabCounts(x.id); d += c.d; t += c.t; });
+    return { d: d, t: t };
+  }
+  function openIncidents() { return S.incidents.filter(function (i) { return i.status !== 'סגור'; }); }
+  function openComplaints() { return S.complaints.filter(function (c) { return c.status !== 'נסגרה'; }); }
+
+  function updateCounts() {
+    $$('[data-gcount]').forEach(function (el) {
+      var g = BY[el.dataset.gcount]; if (!g) return;
+      el.textContent = g.items.filter(function (i) { return S.checks[i.id]; }).length + '/' + g.items.length;
+    });
+    TABS.forEach(function (t) {
+      var el = $('[data-bdg="' + t.id + '"]'); if (!el) return;
+      if (t.badge === 'shift') { var c = tabCounts(t.id); el.textContent = c.d + '/' + c.t; }
+      if (t.badge === 'open') {
+        var n = openIncidents().length + openComplaints().length;
+        el.textContent = String(n);
+        el.classList.toggle('hot', openIncidents().some(function (i) { return i.pri === 1; }));
+      }
+    });
+    var tc = totalCounts();
+    $('#barfill').style.width = (tc.t ? (tc.d / tc.t) * 100 : 0) + '%';
+    $('#bar').setAttribute('aria-valuenow', String(tc.t ? Math.round((tc.d / tc.t) * 100) : 0));
+    $('#progtxt').textContent = tc.d + ' מתוך ' + tc.t + ' סעיפי משמרת';
+  }
+  function updateHeader() {
+    $('#clock').textContent = hhmm(Date.now());
+    $('#datetxt').textContent = dateLabel();
+    var st = S.meta.startedAt;
+    $('#elapsed').textContent = st ? 'במשמרת מזה ' + fmtDur(minsSince(st)) + ' · התחלה ' + hhmm(st) : '';
+    $('#startbtn').hidden = !!st;
+    syncBackup();
+  }
+
+  /* ---------- Rendering ---------- */
+  function opts(list, cur) {
+    return list.map(function (o) { return '<option value="' + esc(o) + '"' + (o === cur ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('');
+  }
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function renderItem(it) {
+    var c = S.checks[it.id]; var note = S.notes[it.id] || '';
+    return '<li class="item' + (c ? ' done' : '') + '" data-item="' + it.id + '">' +
+      '<label class="row"><input type="checkbox" class="cb" data-id="' + it.id + '"' + (c ? ' checked' : '') + '>' +
+      '<span class="box" aria-hidden="true">' + CHECK_SVG + '</span>' +
+      '<span class="txt">' + esc(it.t) + (it.crit ? '<span class="chip">קריטי</span>' : '') + '</span></label>' +
+      '<div class="side"><span class="stamp mono">' + (c ? hhmm(c) : '') + '</span>' +
+      '<button class="note-btn' + (note ? ' has' : '') + '" data-act="note" data-id="' + it.id + '" aria-label="הערה לסעיף">הערה</button></div>' +
+      '<textarea class="inp note" data-note="' + it.id + '" rows="2" placeholder="הערה לסעיף"' + (note ? '' : ' hidden') + '>' + esc(note) + '</textarea></li>';
+  }
+
+  function widgetBrief() {
+    return '<div class="widget two">' +
+      '<label class="fl">שעת התדרוך<input class="inp mono" type="time" data-bind="brief.time" value="' + esc(S.brief.time) + '"></label>' +
+      '<label class="fl">מספר משתתפים<input class="inp mono" type="number" inputmode="numeric" min="0" data-bind="brief.count" value="' + esc(S.brief.count) + '"></label></div>';
+  }
+  function widgetCams() {
+    var total = S.cams.length;
+    var ok = S.cams.filter(function (c) { return c.status === 'תקינה'; }).length;
+    var bad = total - ok;
+    var rows = S.cams.map(function (c) {
+      var cls = c.status === 'חסרה' ? ' bad1' : (c.status === 'תקלה' ? ' bad2' : '');
+      return '<div class="cam' + cls + '" data-cam="' + c.id + '"><span class="cno mono">מס׳ ' + esc(c.no) + '</span>' +
+        '<input class="inp" data-f="officer" value="' + esc(c.officer) + '" placeholder="שוטר" aria-label="שוטר">' +
+        '<select class="inp" data-f="status" aria-label="סטטוס מצלמה">' + opts(CAM_STATUS, c.status) + '</select>' +
+        '<button class="btn danger sm" data-act="cam-del" data-id="' + c.id + '">מחק</button></div>';
+    }).join('');
+    return '<div class="widget"><div class="camsum' + (bad ? ' warn' : '') + '">' +
+      (total ? 'מצלמות תקינות: ' + ok + ' מתוך ' + total + (bad ? ' · ' + bad + ' לטיפול' : '') : 'טבלת מצלמות: עדיין לא נרשמו מצלמות') + '</div>' +
+      rows +
+      '<div class="g2"><label class="fl">מספר מצלמה<input class="inp mono" id="cam-no" inputmode="text" autocomplete="off"></label>' +
+      '<label class="fl">שוטר<input class="inp" id="cam-officer" autocomplete="off"></label></div>' +
+      '<div class="actions"><button class="btn" data-act="cam-add">הוסף מצלמה לטבלה</button></div></div>';
+  }
+  function widgetRound(key, label, lim) {
+    var log = S.rounds[key] || []; var last = log.length ? log[log.length - 1] : 0;
+    var late = last && minsSince(last) >= lim;
+    return '<div class="widget"><div class="round' + (late ? ' late' : '') + '" data-round data-last="' + last + '" data-lim="' + lim + '">' +
+      '<div class="round-info"><strong>' + label + '</strong><span class="round-since">' + (last ? 'לפני ' + fmtDur(minsSince(last)) : 'טרם נרשם סבב') + '</span>' +
+      '<span class="small">מומלץ כל ' + lim + ' דק׳</span></div>' +
+      '<div class="actions"><button class="btn" data-act="round-add" data-key="' + key + '">רשום סבב עכשיו</button>' +
+      (log.length ? '<button class="link" data-act="round-undo" data-key="' + key + '">בטל את האחרון</button>' : '') + '</div>' +
+      (log.length ? '<div class="chips">' + log.slice(-8).map(function (t) { return '<span class="chip-t mono">' + hhmm(t) + '</span>'; }).join('') + '</div>' : '') +
+      '</div></div>';
+  }
+  var WIDGETS = {
+    brief: widgetBrief, cams: widgetCams,
+    'round-log': function () { return widgetRound('log', 'סבב יומן', 60); },
+    'round-desk': function () { return widgetRound('desk', 'סבב דלפק', 60); }
+  };
+
+  function renderGroup(g) {
+    var done = g.items.filter(function (i) { return S.checks[i.id]; }).length;
+    var right = g.scope === 'event'
+      ? '<span class="scope">לכל אירוע</span><button class="btn ghost sm" data-act="reset-group" data-id="' + g.id + '">אירוע חדש: אפס</button>'
+      : '<span class="gcount mono" data-gcount="' + g.id + '">' + done + '/' + g.items.length + '</span>';
+    return '<section class="group' + (g.ordered ? ' ordered' : '') + '" data-group="' + g.id + '">' +
+      '<div class="gh"><div><h3>' + esc(g.title) + '</h3>' + (g.hint ? '<p class="hint">' + esc(g.hint) + '</p>' : '') + '</div><div class="gh-r">' + right + '</div></div>' +
+      '<ul class="items">' + g.items.map(renderItem).join('') + '</ul>' +
+      (g.widget ? WIDGETS[g.widget]() : '') + '</section>';
+  }
+  function groupsOf(tab) { return GROUPS.filter(function (g) { return g.tab === tab; }); }
+
+  var PRI = [
+    { p: 1, title: 'סכנת חיים או אירוע ביטחוני',
+      ex: ['ירי, דקירה, חשד לפיגוע', 'אירוע רב נפגעים', 'חטיפה או חשד לחטיפה', 'אלימות פעילה, כולל אלימות במשפחה בעיצומה', 'שוטר נפגע או קריאת עזרה משוטר'],
+      act: 'שיגור מיידי של הכוח הקרוב ביותר, התרעה למוקד המחוזי, ניהול האירוע בקשר ודיווח מיידי לדרג בכיר.' },
+    { p: 2, title: 'פגיעה בנפש או בסדר הציבורי',
+      ex: ['תאונת דרכים עם פצועים', 'הפרת סדר או התקהלות אלימה', 'אלימות שזה עתה אירעה', 'עבירת רכוש בעיצומה או חשוד בסביבה', 'קטין נעדר או אדם בסיכון'],
+      act: 'שיגור הכוח הפנוי הקרוב בהקדם, עדכון הקצין התורן ומעקב תכוף עד לטיפול.' },
+    { p: 3, title: 'טיפול שוטף',
+      ex: ['תלונה על אירוע שחלף', 'מטרד, רעש, סכסוך שכנים', 'הגשת תלונה בתחנה או בטלפון', 'בקשה לשירות או למידע'],
+      act: 'טיפול לפי סדר הגעה, רישום ביומן והפניה לשוטר מתאים. אם האירוע מתברר כחמור יותר: מעלים עדיפות.' }
+  ];
+  var ROUTES = [
+    { to: 'מוקד מחוזי', when: ['צורך בתגבור או בכוחות מעבר לגזרת התחנה', 'אירוע רב-תחנתי או התפתחות מהירה', 'ריכוז מידע, דיווח ותיאום מול גורמי חוץ'] },
+    { to: 'קצין אח״ם', when: ['עבירה חמורה שמצריכה חקירה', 'זירה לשימור ולבדיקה פלילית', 'חשוד שנעצר בנסיבות חמורות', 'חקירה שנמשכת מעבר למשמרת'] },
+    { to: 'מפקד תחנה או קצין בכיר', when: ['אחד מטריגרי הדיווח המיידי', 'החלטה חריגה או חריגה מנוהל', 'אירוע בעל משמעות ציבורית'] }
+  ];
+  var TRIGGERS = ['אירוע ביטחוני או חשד לפיגוע', 'פגיעה בשוטר או שימוש בכוח חריג', 'ירי של שוטר', 'מוות לא טבעי או אירוע רב נפגעים', 'אירוע בעל עניין ציבורי או תקשורתי רחב', 'פגיעה במוסד רגיש או בתשתית קריטית', 'כל אירוע שבו אינך בטוח'];
+
+  var RENDER = {
+    start: function () {
+      return '<h2>תחילת משמרת</h2><p class="lede">שלושה שלבים לפי הסדר: קבלת משמרת, תדרוך, בדק מצלמות. כל סימון נרשם עם שעה, ואפשר להוסיף הערה לכל סעיף.</p>' +
+        groupsOf('start').map(renderGroup).join('');
+    },
+    triage: function () {
+      var cards = PRI.map(function (c) {
+        return '<article class="card"><span class="pill p' + c.p + '">עדיפות ' + c.p + '</span><h3>' + esc(c.title) + '</h3><ul>' +
+          c.ex.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul><p class="act">' + esc(c.act) + '</p></article>';
+      }).join('');
+      return '<h2>תעדוף אירועים חריגים</h2><p class="lede">סווג עדיפות בשניות הראשונות, ובספק בחר בגבוהה יותר. הדוגמאות להמחשה בלבד, והסיווג המחייב לפי נהלי המשטרה.</p>' +
+        '<div class="cards">' + cards + '</div>' +
+        '<section class="plain"><h3>טריגרים לדיווח מיידי לדרג בכיר</h3><ul>' + TRIGGERS.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+        '<p class="small">הרשימה להמחשה. הרשימה המחייבת היא בנוהל הדיווח המחוזי.</p></section>' +
+        groupsOf('triage').map(renderGroup).join('') +
+        '<div class="actions"><button class="btn" data-act="goto" data-id="open" data-focus="inc-add">פתח אירוע במעקב</button></div>';
+    },
+    handoff: function () {
+      var cards = ROUTES.map(function (r) {
+        return '<article class="card"><h3>' + esc(r.to) + '</h3><ul>' + r.when.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></article>';
+      }).join('');
+      var flow = ['מה קרה', 'איפה', 'מתי', 'נפגעים ומעורבים', 'עדיפות', 'מה בוצע', 'מה מבוקש'];
+      return '<h2>העברת אירועים</h2><p class="lede">למי מעבירים, ואיך מוודאים שהמסירה התקבלה. ההכוונה כללית, ובספק מתייעצים עם הקצין הבכיר התורן במחוז.</p>' +
+        '<div class="cards">' + cards + '</div>' +
+        '<section class="plain"><h3>מבנה מסירה קבוע</h3><div class="flow">' + flow.map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div></section>' +
+        groupsOf('handoff').map(renderGroup).join('') +
+        '<div class="actions"><button class="btn" data-act="goto" data-id="open">למעקב האירועים: העתקת נוסח העברה</button></div>';
+    },
+    complaints: function () {
+      return '<h2>תלונות אזרחים</h2><p class="lede">ניהול שוטף של הדלפק והתור, וקליטה מסודרת של כל פונה. תלונות שנשארות פתוחות עוברות לטבלת המעקב.</p>' +
+        groupsOf('complaints').map(renderGroup).join('') +
+        '<div class="actions"><button class="btn" data-act="goto" data-id="open" data-focus="cmp-add">פתח תלונה במעקב</button></div>';
+    },
+    desk: function () {
+      return '<h2>עבודה מול היומנאי</h2><p class="lede">היומנאי הוא הזיכרון התפעולי של המשמרת. מה שלא נרשם ביומן, לא קרה מבחינת הקצין הבא.</p>' +
+        groupsOf('desk').map(renderGroup).join('');
+    },
+    open: renderOpen,
+    close: function () {
+      return '<h2>סיום משמרת</h2><p class="lede">סגירה מסודרת לפני המסירה לקצין הנכנס. הסיכום מועתק כטקסט אחד שאפשר להדביק בהודעה.</p>' +
+        groupsOf('close').map(renderGroup).join('') +
+        '<div class="actions"><button class="btn" data-act="copy-summary">העתק סיכום משמרת</button>' +
+        '<button class="btn ghost" data-act="backup">הורד גיבוי משמרת</button></div>' +
+        '<p class="small">הגיבוי הוא קובץ טקסט עם כל הסימונים, האירועים והתלונות. הוא זמין עד 16 שעות מתחילת המשמרת.</p>';
+    }
+  };
+
+  function incCard(i) {
+    var closed = i.status === 'סגור';
+    var lim = STALE_INC[i.pri] || 60;
+    var m = minsSince(i.updated); var stale = !closed && m >= lim;
+    return '<article class="inc' + (closed ? ' closed' : '') + (stale ? ' stale' : '') + '" data-inc="' + i.id + '"' +
+      (closed ? '' : ' data-track data-last="' + i.updated + '" data-lim="' + lim + '"') + '>' +
+      '<div class="inc-h"><span class="pill p' + i.pri + '">עדיפות ' + i.pri + '</span><span class="num mono">' + esc(i.num || 'ללא מס׳') + '</span>' +
+      '<span class="since" data-since="' + i.created + '" data-prefix="פתוח ">פתוח ' + fmtDur(minsSince(i.created)) + '</span>' +
+      '<span class="stale-flag"' + (stale ? '' : ' hidden') + '>ללא עדכון ' + fmtDur(m) + '</span></div>' +
+      '<h3>' + esc(i.desc) + '</h3>' + (i.loc ? '<p class="loc">' + esc(i.loc) + '</p>' : '') +
+      '<div class="g2"><label class="fl">סטטוס<select class="inp" data-f="status">' + opts(STATUS_INC, i.status) + '</select></label>' +
+      '<label class="fl">הועבר אל<select class="inp" data-f="to">' + opts(TO_LIST, i.to) + '</select></label></div>' +
+      '<label class="fl">הערות ומה בוצע<textarea class="inp" rows="2" data-f="notes">' + esc(i.notes) + '</textarea></label>' +
+      '<p class="small">עדכון אחרון ' + hhmm(i.updated) + '</p>' +
+      '<div class="actions"><button class="btn sm" data-act="inc-touch" data-id="' + i.id + '">עדכנתי עכשיו</button>' +
+      '<button class="btn ghost sm" data-act="inc-copy" data-id="' + i.id + '">העתק נוסח העברה</button>' +
+      '<button class="btn danger sm" data-act="inc-del" data-id="' + i.id + '">מחק</button></div></article>';
+  }
+  function cmpCard(c) {
+    var closed = c.status === 'נסגרה';
+    var m = minsSince(c.updated); var stale = !closed && m >= STALE_CMP;
+    return '<article class="inc' + (closed ? ' closed' : '') + (stale ? ' stale' : '') + '" data-cmp="' + c.id + '"' +
+      (closed ? '' : ' data-track data-last="' + c.updated + '" data-lim="' + STALE_CMP + '"') + '>' +
+      '<div class="inc-h"><span class="pill p3">' + esc(c.type) + '</span><span class="num mono">' + esc(c.num || 'ללא מס׳') + '</span>' +
+      '<span class="since" data-since="' + c.created + '" data-prefix="ממתינה ">ממתינה ' + fmtDur(minsSince(c.created)) + '</span>' +
+      '<span class="stale-flag"' + (stale ? '' : ' hidden') + '>ללא עדכון ' + fmtDur(m) + '</span></div>' +
+      '<h3>' + esc(c.desc || 'ללא תיאור') + '</h3>' + (c.who ? '<p class="loc">פונה: ' + esc(c.who) + '</p>' : '') +
+      '<div class="g2"><label class="fl">סטטוס<select class="inp" data-f="status">' + opts(STATUS_CMP, c.status) + '</select></label></div>' +
+      '<label class="fl">הערות<textarea class="inp" rows="2" data-f="notes">' + esc(c.notes) + '</textarea></label>' +
+      '<div class="actions"><button class="btn sm" data-act="cmp-touch" data-id="' + c.id + '">עדכנתי את הפונה</button>' +
+      '<button class="btn danger sm" data-act="cmp-del" data-id="' + c.id + '">מחק</button></div></article>';
+  }
+
+  function renderOpen() {
+    var inc = S.incidents.slice().sort(function (a, b) {
+      return ((a.status === 'סגור') - (b.status === 'סגור')) || (a.pri - b.pri) || (a.created - b.created);
+    });
+    var cmp = S.complaints.slice().sort(function (a, b) {
+      return ((a.status === 'נסגרה') - (b.status === 'נסגרה')) || (a.created - b.created);
+    });
+    var oi = openIncidents(); var p1 = oi.filter(function (i) { return i.pri === 1; }).length;
+    var stats = '<div class="stats"><span>אירועים פתוחים <b>' + oi.length + '</b></span>' +
+      '<span class="' + (p1 ? 'hot' : '') + '">עדיפות 1 <b>' + p1 + '</b></span>' +
+      '<span>תלונות פתוחות <b>' + openComplaints().length + '</b></span></div>';
+    var incForm = '<details class="addbox" id="inc-add"><summary>+ אירוע חדש במעקב</summary><div class="addbody">' +
+      '<div class="g2"><label class="fl">מספר אירוע<input class="inp mono" id="inc-num" autocomplete="off"></label>' +
+      '<label class="fl">מיקום<input class="inp" id="inc-loc" autocomplete="off"></label></div>' +
+      '<label class="fl">מה קרה (קצר)<input class="inp" id="inc-desc" autocomplete="off"></label>' +
+      '<fieldset class="seg"><legend>עדיפות</legend>' +
+      [1, 2, 3].map(function (p) { return '<label><input type="radio" name="inc-pri" value="' + p + '"><span class="s' + p + '">עדיפות ' + p + '</span></label>'; }).join('') + '</fieldset>' +
+      '<p class="err" id="inc-err" hidden></p>' +
+      '<div class="actions"><button class="btn" data-act="inc-add">הוסף למעקב</button></div></div></details>';
+    var cmpForm = '<details class="addbox" id="cmp-add"><summary>+ תלונה חדשה במעקב</summary><div class="addbody">' +
+      '<div class="g2"><label class="fl">מספר תלונה<input class="inp mono" id="cmp-num" autocomplete="off"></label>' +
+      '<label class="fl">סוג<select class="inp" id="cmp-type">' + opts(CMP_TYPES, 'פלילית') + '</select></label></div>' +
+      '<div class="g2"><label class="fl">פונה (ראשי תיבות בלבד)<input class="inp" id="cmp-who" autocomplete="off"></label>' +
+      '<label class="fl">תיאור קצר<input class="inp" id="cmp-desc" autocomplete="off"></label></div>' +
+      '<div class="actions"><button class="btn" data-act="cmp-add">הוסף למעקב</button></div></div></details>';
+    return '<h2>מעקב אירועים ותלונות פתוחים</h2>' + stats +
+      '<p class="lede">אירוע ללא עדכון מסומן בכתום אחרי ' + STALE_INC[1] + ' דקות בעדיפות 1, ' + STALE_INC[2] + ' בעדיפות 2 ו-' + STALE_INC[3] + ' בעדיפות 3. התלונות מסומנות אחרי ' + STALE_CMP + ' דקות.</p>' +
+      incForm +
+      '<div class="list">' + (inc.length ? inc.map(incCard).join('') : '<p class="empty">אין אירועים במעקב. הוסף אירוע חריג שנפתח במשמרת, והוא יופיע כאן עם שעון פתיחה, סטטוס והעברה.</p>') + '</div>' +
+      '<h2>תלונות אזרחים פתוחות</h2>' + cmpForm +
+      '<div class="list">' + (cmp.length ? cmp.map(cmpCard).join('') : '<p class="empty">אין תלונות פתוחות. תלונה שהטיפול בה לא הסתיים בדלפק מתווספת לכאן עם שעון המתנה.</p>') + '</div>';
+  }
+
+  function staleNotice() {
+    if (!oldData) return '';
+    return '<div class="notice"><p>הנתונים השמורים במכשיר הזה נשמרו לפני יותר מ-16 שעות (' + hhmm(S.lastActive) + '). להתחיל משמרת חדשה או להמשיך באותה משמרת?</p>' +
+      '<div class="actions"><button class="btn" data-act="new-shift-now">התחל משמרת חדשה</button><button class="btn ghost" data-act="keep-shift">המשך באותה משמרת</button></div></div>';
+  }
+
+  function renderTabs() {
+    $('#tabs-scroll').innerHTML = TABS.map(function (t, n) {
+      var b = '';
+      if (t.badge === 'shift') { var c = tabCounts(t.id); b = '<span class="bdg mono" data-bdg="' + t.id + '">' + c.d + '/' + c.t + '</span>'; }
+      if (t.badge === 'open') { b = '<span class="bdg mono" data-bdg="open">0</span>'; }
+      return '<button class="tab' + (t.id === S.tab ? ' on' : '') + '" style="--s:var(--c' + (n + 1) + ')" data-act="tab" data-id="' + t.id + '">' + t.label + b + '</button>';
+    }).join('');
+  }
+  function renderPanel() {
+    var openIds = $$('details[open]').map(function (d) { return d.id; }).filter(Boolean);
+    var y = window.scrollY;
+    $('#panel').innerHTML = staleNotice() + TABS.map(function (t, n) {
+      return '<section class="sec" id="sec-' + t.id + '" style="--s:var(--c' + (n + 1) + ')">' + RENDER[t.id]() + '</section>';
+    }).join('');
+    openIds.forEach(function (id) { var d = document.getElementById(id); if (d) d.open = true; });
+    updateCounts();
+    syncBackup();
+    if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+  }
+  var activeId = 'start', navLock = 0;
+  function smooth() {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; } catch (e) { return 'auto'; }
+  }
+  function setActive(id) {
+    activeId = id;
+    $$('.tab').forEach(function (b) {
+      var on = b.dataset.id === id; b.classList.toggle('on', on);
+      if (on) { b.setAttribute('aria-current', 'true'); try { b.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
+      else b.removeAttribute('aria-current');
+    });
+  }
+  function goTab(id, focusId) {
+    navLock = Date.now() + 900;
+    setActive(id);
+    var target = document.getElementById('sec-' + id);
+    var d = focusId ? document.getElementById(focusId) : null;
+    if (d) { d.open = true; target = d; }
+    if (target) {
+      try { target.scrollIntoView({ behavior: smooth(), block: d ? 'center' : 'start' }); } catch (e) { target.scrollIntoView(); }
+    }
+    if (d) { var f = d.querySelector('input'); if (f) f.focus({ preventScroll: true }); }
+  }
+
+  /* ---------- Actions ---------- */
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 2200);
+  }
+  function showFallback(text) {
+    var old = $('#fallback'); if (old) old.remove();
+    var d = document.createElement('section'); d.className = 'fallback'; d.id = 'fallback';
+    d.innerHTML = '<strong>ההעתקה האוטומטית לא זמינה בדפדפן הזה</strong><p class="small">סמן את הטקסט והעתק ידנית.</p><textarea class="inp" rows="10" readonly></textarea>';
+    d.querySelector('textarea').value = text;
+    $('#panel').appendChild(d);
+    var ta = d.querySelector('textarea'); ta.focus(); ta.select();
+    try { d.scrollIntoView({ block: 'center' }); } catch (e) {}
+  }
+  function copyText(text) {
+    try {
+      navigator.clipboard.writeText(text).then(function () { toast('הועתק ללוח'); }, function () { showFallback(text); });
+    } catch (e) { showFallback(text); }
+  }
+  function twoStep(btn, label, fn) {
+    if (btn.dataset.armed) {
+      clearTimeout(Number(btn.dataset.armed)); btn.textContent = btn.dataset.orig; delete btn.dataset.armed; btn.classList.remove('armed'); fn(); return;
+    }
+    btn.dataset.orig = btn.textContent; btn.textContent = label; btn.classList.add('armed');
+    btn.dataset.armed = String(setTimeout(function () {
+      btn.textContent = btn.dataset.orig; delete btn.dataset.armed; btn.classList.remove('armed');
+    }, 3500));
+  }
+  function handoffText(i) {
+    var to = (i.to && i.to !== '—') ? i.to : '—';
+    return ['העברת אירוע',
+      'מס׳ אירוע: ' + (i.num || '—'),
+      'עדיפות: ' + i.pri,
+      'מה קרה: ' + i.desc,
+      'איפה: ' + (i.loc || '—'),
+      'סטטוס: ' + i.status,
+      'מועבר אל: ' + to,
+      'נפתח ב-' + hhmm(i.created) + ' (לפני ' + fmtDur(minsSince(i.created)) + ')',
+      'מה בוצע / הערות: ' + (i.notes || '—'),
+      'קצין תורן: ' + (S.meta.officer || '—') + (S.meta.station ? ' | תחנה ' + S.meta.station : ''),
+      'נא לאשר קבלה ולחזור על עיקרי הדברים.'].join('\n');
+  }
+  function buildSummary() {
+    var m = S.meta; var L = [];
+    L.push('סיכום משמרת: קצין תורן');
+    L.push([m.station && ('תחנה: ' + m.station), m.shift && ('משמרת: ' + m.shift), 'תאריך: ' + dateLabel()].filter(Boolean).join(' | '));
+    L.push('קצין תורן: ' + (m.officer || '—') + ' | יומנאי: ' + (m.yoman || '—'));
+    if (m.startedAt) L.push('התחלת משמרת: ' + hhmm(m.startedAt));
+    var tc = totalCounts(); L.push('סעיפי משמרת שבוצעו: ' + tc.d + ' מתוך ' + tc.t);
+    if (S.brief.time || S.brief.count) L.push('תדרוך: ' + (S.brief.time || '—') + ', משתתפים: ' + (S.brief.count || '—'));
+    if (S.cams.length) {
+      var bad = S.cams.filter(function (c) { return c.status !== 'תקינה'; });
+      L.push('מצלמות גוף: ' + (S.cams.length - bad.length) + ' תקינות מתוך ' + S.cams.length + (bad.length ? ' | לטיפול: ' + bad.map(function (c) { return c.no + ' (' + c.status + ')'; }).join(', ') : ''));
+    }
+    var oi = openIncidents().sort(function (a, b) { return a.pri - b.pri || a.created - b.created; });
+    L.push(''); L.push('אירועים פתוחים (' + oi.length + '):');
+    if (!oi.length) L.push('אין');
+    oi.forEach(function (i) {
+      L.push('• [עדיפות ' + i.pri + '] ' + (i.num || 'ללא מס׳') + ': ' + i.desc + (i.loc ? ' (' + i.loc + ')' : '') + ' | ' + i.status +
+        (i.to && i.to !== '—' ? ' → ' + i.to : '') + ' | פתוח ' + fmtDur(minsSince(i.created)) + (i.notes ? ' | ' + i.notes : ''));
+    });
+    var closed = S.incidents.length - oi.length;
+    if (closed) L.push('אירועים שנסגרו במשמרת: ' + closed);
+    var oc = openComplaints();
+    L.push(''); L.push('תלונות פתוחות (' + oc.length + '):');
+    if (!oc.length) L.push('אין');
+    oc.forEach(function (c) {
+      L.push('• ' + (c.num || 'ללא מס׳') + ' (' + c.type + '): ' + (c.desc || '—') + ' | ' + c.status + ' | ממתינה ' + fmtDur(minsSince(c.created)) + (c.notes ? ' | ' + c.notes : ''));
+    });
+    L.push(''); L.push('סבבי יומן שנרשמו: ' + S.rounds.log.length + ' | סבבי דלפק: ' + S.rounds.desk.length);
+    return L.join('\n');
+  }
+  function newShift() {
+    var keep = { station: S.meta.station };
+    S = defaults(); S.meta.station = keep.station; save(); oldData = false;
+    $$('[data-bind]').forEach(function (el) { el.value = getPath(el.dataset.bind) || ''; });
+    renderPanel(); updateHeader(); toast('משמרת חדשה נפתחה');
+  }
+  function resetGroup(id) {
+    var g = BY[id]; if (!g) return;
+    g.items.forEach(function (i) { delete S.checks[i.id]; delete S.notes[i.id]; });
+    save(); renderPanel();
+  }
+  function onCheck(cb) {
+    var id = cb.dataset.id;
+    if (cb.checked) { S.checks[id] = Date.now(); if (!S.meta.startedAt) S.meta.startedAt = Date.now(); }
+    else delete S.checks[id];
+    var li = cb.closest('.item');
+    li.classList.toggle('done', cb.checked);
+    li.querySelector('.stamp').textContent = cb.checked ? hhmm(S.checks[id]) : '';
+    save(); updateCounts(); updateHeader();
+  }
+  function addIncident() {
+    var desc = $('#inc-desc').value.trim(); var pri = $('input[name="inc-pri"]:checked'); var err = $('#inc-err');
+    if (!desc || !pri) { err.textContent = !desc ? 'כתוב תיאור קצר של האירוע.' : 'בחר עדיפות.'; err.hidden = false; return; }
+    var now = Date.now();
+    S.incidents.push({ id: uid(), num: $('#inc-num').value.trim(), desc: desc, loc: $('#inc-loc').value.trim(), pri: Number(pri.value), status: 'פתוח', to: '—', notes: '', created: now, updated: now });
+    var f1 = $('#inc-add'); if (f1) f1.open = false;
+    save(); renderPanel(); toast('האירוע נוסף למעקב');
+  }
+  function addComplaint() {
+    var now = Date.now();
+    S.complaints.push({ id: uid(), num: $('#cmp-num').value.trim(), type: $('#cmp-type').value, who: $('#cmp-who').value.trim(), desc: $('#cmp-desc').value.trim(), status: 'התקבלה', notes: '', created: now, updated: now });
+    var f2 = $('#cmp-add'); if (f2) f2.open = false;
+    save(); renderPanel(); toast('התלונה נוספה למעקב');
+  }
+  function addCam() {
+    var no = $('#cam-no').value.trim(); if (!no) { $('#cam-no').focus(); return; }
+    S.cams.push({ id: uid(), no: no, officer: $('#cam-officer').value.trim(), status: 'תקינה' });
+    save(); renderPanel();
+  }
+
+  $('#app').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var act = b.dataset.act; var id = b.dataset.id;
+    var i;
+    switch (act) {
+      case 'tab': goTab(id); break;
+      case 'goto': goTab(id, b.dataset.focus); break;
+      case 'note': var ta = $('[data-note="' + id + '"]'); if (ta) { ta.hidden = !ta.hidden; if (!ta.hidden) ta.focus(); } break;
+      case 'reset-group': resetGroup(id); break;
+      case 'start': S.meta.startedAt = Date.now(); save(); updateHeader(); break;
+      case 'new-shift': twoStep(b, 'לחץ שוב לפתיחת משמרת חדשה', newShift); break;
+      case 'new-shift-now': newShift(); break;
+      case 'keep-shift': oldData = false; save(); renderPanel(); break;
+      case 'inc-add': addIncident(); break;
+      case 'inc-touch': i = S.incidents.find(function (x) { return x.id === id; }); if (i) { i.updated = Date.now(); save(); renderPanel(); toast('העדכון נרשם'); } break;
+      case 'inc-copy': i = S.incidents.find(function (x) { return x.id === id; }); if (i) copyText(handoffText(i)); break;
+      case 'inc-del': twoStep(b, 'לחץ שוב למחיקה', function () { S.incidents = S.incidents.filter(function (x) { return x.id !== id; }); save(); renderPanel(); }); break;
+      case 'cmp-add': addComplaint(); break;
+      case 'cmp-touch': i = S.complaints.find(function (x) { return x.id === id; }); if (i) { i.updated = Date.now(); save(); renderPanel(); toast('העדכון נרשם'); } break;
+      case 'cmp-del': twoStep(b, 'לחץ שוב למחיקה', function () { S.complaints = S.complaints.filter(function (x) { return x.id !== id; }); save(); renderPanel(); }); break;
+      case 'cam-add': addCam(); break;
+      case 'cam-del': twoStep(b, 'לחץ שוב למחיקה', function () { S.cams = S.cams.filter(function (x) { return x.id !== id; }); save(); renderPanel(); }); break;
+      case 'round-add': S.rounds[b.dataset.key].push(Date.now()); save(); renderPanel(); toast('הסבב נרשם'); break;
+      case 'round-undo': S.rounds[b.dataset.key].pop(); save(); renderPanel(); break;
+      case 'copy-summary': copyText(buildSummary()); break;
+      case 'backup': doBackup(); break;
+    }
+  });
+
+  function field(t, isSelect) {
+    if (t.dataset.bind) { setPath(t.dataset.bind, t.value); save(); return; }
+    if (t.dataset.note) {
+      var v = t.value;
+      if (v.trim()) S.notes[t.dataset.note] = v; else delete S.notes[t.dataset.note];
+      var btn = $('[data-act="note"][data-id="' + t.dataset.note + '"]'); if (btn) btn.classList.toggle('has', !!v.trim());
+      save(); return;
+    }
+    var holder, list, o;
+    if ((holder = t.closest('[data-inc]'))) list = S.incidents;
+    else if ((holder = t.closest('[data-cmp]'))) list = S.complaints;
+    else if ((holder = t.closest('[data-cam]'))) list = S.cams;
+    if (!holder || !t.dataset.f) return;
+    var key = holder.dataset.inc || holder.dataset.cmp || holder.dataset.cam;
+    o = list.find(function (x) { return x.id === key; }); if (!o) return;
+    o[t.dataset.f] = t.value;
+    if (isSelect && !holder.dataset.cam) o.updated = Date.now();
+    save();
+    if (isSelect) renderPanel();
+  }
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.tagName === 'SELECT' || t.type === 'checkbox' || t.type === 'radio') return;
+    field(t, false);
+  });
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.classList && t.classList.contains('cb')) { onCheck(t); return; }
+    if (t.tagName === 'SELECT') field(t, true);
+  });
+
+  function tickDom() {
+    updateHeader();
+    $$('[data-since]').forEach(function (el) { el.textContent = el.dataset.prefix + fmtDur(minsSince(Number(el.dataset.since))); });
+    $$('[data-track]').forEach(function (el) {
+      var m = minsSince(Number(el.dataset.last)); var stale = m >= Number(el.dataset.lim);
+      el.classList.toggle('stale', stale);
+      var f = el.querySelector('.stale-flag'); if (f) { f.hidden = !stale; f.textContent = 'ללא עדכון ' + fmtDur(m); }
+    });
+    $$('[data-round]').forEach(function (el) {
+      var last = Number(el.dataset.last); if (!last) return;
+      var m = minsSince(last);
+      el.classList.toggle('late', m >= Number(el.dataset.lim));
+      var s = el.querySelector('.round-since'); if (s) s.textContent = 'לפני ' + fmtDur(m);
+    });
+  }
+
+  /* ---------- Backup file ---------- */
+  var BACKUP_MS = 16 * 3600 * 1000;
+  var dl = null;
+  function backupExpired() { var st = S.meta.startedAt; return !!st && Date.now() - st > BACKUP_MS; }
+  function dt(ts) { var d = new Date(ts); return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ' + hhmm(ts); }
+  function syncBackup() {
+    var st = S.meta.startedAt; var exp = backupExpired();
+    var left = st ? Math.max(0, Math.floor((st + BACKUP_MS - Date.now()) / 60000)) : 0;
+    $$('[data-act="backup"]').forEach(function (b) {
+      b.disabled = exp;
+      b.textContent = dl ? 'הורד גיבוי משמרת' : 'העתק גיבוי משמרת';
+    });
+    var n = $('#backupnote'); if (!n) return;
+    n.textContent = !st ? '' : (exp ? 'חלפו 16 שעות מתחילת המשמרת, הגיבוי כבר לא זמין.' : 'גיבוי זמין עוד ' + fmtDur(left) + ' (עד 16 שעות מתחילת המשמרת).');
+  }
+  function buildBackup() {
+    var L = [];
+    L.push('בס"ד');
+    L.push('גיבוי משמרת: צ׳ק-ליסט קצין תורן');
+    L.push('נוצר: ' + dt(Date.now()));
+    if (S.meta.startedAt) L.push('התחלת משמרת: ' + dt(S.meta.startedAt));
+    L.push('');
+    L.push(buildSummary());
+    L.push(''); L.push('===== סעיפי הצ׳ק-ליסט =====');
+    TABS.forEach(function (t) {
+      GROUPS.filter(function (g) { return g.tab === t.id; }).forEach(function (g) {
+        var any = g.items.some(function (i) { return S.checks[i.id] || S.notes[i.id]; });
+        if (g.scope === 'event' && !any) return;
+        L.push(''); L.push(t.label + ' / ' + g.title + (g.scope === 'event' ? ' (לאירוע האחרון)' : ''));
+        g.items.forEach(function (i) {
+          L.push('  [' + (S.checks[i.id] ? 'x' : ' ') + '] ' + i.t + (S.checks[i.id] ? ' (' + hhmm(S.checks[i.id]) + ')' : ''));
+          if (S.notes[i.id]) L.push('      הערה: ' + S.notes[i.id]);
+        });
+      });
+    });
+    L.push(''); L.push('===== כל האירועים במעקב (' + S.incidents.length + ') =====');
+    S.incidents.forEach(function (i) {
+      L.push('• ' + (i.num || 'ללא מס׳') + ' | עדיפות ' + i.pri + ' | ' + i.desc + ' | ' + (i.loc || '—') + ' | ' + i.status + ' | הועבר אל: ' + i.to + ' | נפתח ' + dt(i.created) + ' | עדכון אחרון ' + dt(i.updated) + ' | ' + (i.notes || '—'));
+    });
+    L.push(''); L.push('===== כל התלונות במעקב (' + S.complaints.length + ') =====');
+    S.complaints.forEach(function (c) {
+      L.push('• ' + (c.num || 'ללא מס׳') + ' | ' + c.type + ' | פונה: ' + (c.who || '—') + ' | ' + (c.desc || '—') + ' | ' + c.status + ' | התקבלה ' + dt(c.created) + ' | עדכון אחרון ' + dt(c.updated) + ' | ' + (c.notes || '—'));
+    });
+    L.push(''); L.push('===== מצלמות גוף (' + S.cams.length + ') =====');
+    S.cams.forEach(function (c) { L.push('• מס׳ ' + c.no + ' | ' + (c.officer || '—') + ' | ' + c.status); });
+    L.push(''); L.push('סבבי יומן: ' + (S.rounds.log.map(hhmm).join(', ') || '—'));
+    L.push('סבבי דלפק: ' + (S.rounds.desk.map(hhmm).join(', ') || '—'));
+    L.push(''); L.push('===== נתונים מובנים (לשחזור עתידי) =====');
+    L.push(JSON.stringify(S));
+    return '﻿' + L.join('\r\n');
+  }
+  function doBackup() {
+    if (backupExpired()) { toast('חלפו 16 שעות מתחילת המשמרת. הגיבוי כבר לא זמין.'); return; }
+    var text = buildBackup();
+    if (!dl) { copyText(text); return; }
+    var d = new Date();
+    var name = 'duty-officer-backup-' + todayStr() + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.txt';
+    dl.save({ filename: name, data: text }).then(function () {
+      toast('הגיבוי נשמר');
+    }, function (err) {
+      var c = err && err.code;
+      if (c === 'declined') return;
+      if (c === 'rate_limited') { toast('חלון שמירה כבר פתוח. נסה שוב בעוד רגע'); return; }
+      copyText(text);
+    });
+  }
+  dl = {
+    save: function (o) {
+      return new Promise(function (res, rej) {
+        try {
+          var blob = new Blob([o.data], { type: 'text/plain;charset=utf-8' });
+          var u = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = u; a.download = o.filename; document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
+          res({ status: 'saved' });
+        } catch (e) { rej({ code: 'unavailable' }); }
+      });
+    }
+  };
+
+  /* ---------- Init ---------- */
+  $$('.hdr [data-bind]').forEach(function (el) { el.value = getPath(el.dataset.bind) || ''; });
+  S.tab = 'start';
+  renderTabs();
+  renderPanel();
+  updateHeader();
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking || Date.now() < navLock) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      var cur = TABS[0].id;
+      TABS.forEach(function (t) {
+        var el = document.getElementById('sec-' + t.id);
+        if (el && el.getBoundingClientRect().top <= 140) cur = t.id;
+      });
+      if (cur !== activeId) setActive(cur);
+    });
+  }, { passive: true });
+  if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+  setInterval(tickDom, 30000);
+})();
+</script></body></html>
